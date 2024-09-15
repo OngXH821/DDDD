@@ -18,6 +18,9 @@ df = pd.read_csv('Dataset-SA.csv')
 # Count the number of reviews in the dataset
 total_reviews = len(df)
 
+# Display the total number of reviews before preprocessing
+st.write(f"Total Number of Reviews before Preprocessing: {total_reviews}")
+
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
 
@@ -27,8 +30,22 @@ def preprocess_text(text):
     words = [word for word in text.split() if word not in stop_words]
     return ' '.join(words)
 
+# Check for missing/empty reviews before preprocessing
+st.write("Number of missing/empty reviews before preprocessing:", df['Review'].isnull().sum())
+
+# Display sentiment distribution before preprocessing
+st.write("Sentiment distribution before preprocessing:")
+st.write(df['Sentiment'].value_counts())
+
 # Apply preprocessing
 df['Review'] = df['Review'].apply(preprocess_text)
+
+# Check for missing/empty reviews after preprocessing
+st.write("Number of missing/empty reviews after preprocessing:", (df['Review'] == '').sum())
+
+# Display sentiment distribution after preprocessing
+st.write("Sentiment distribution after preprocessing:")
+st.write(df['Sentiment'].value_counts())
 
 # Split data
 X = df['Review']
