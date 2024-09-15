@@ -123,11 +123,14 @@ sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
 
+# Define colors for sentiment categories, ensure you have one color per category
+colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']  # Adjust this list as needed
+
 # Calculate percentages
 sentiment_percentages = sentiment_sizes / sentiment_sizes.sum() * 100
 
 # Plot pie chart
 fig, ax = plt.subplots(figsize=(8, 6))
-ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=['lightblue', 'lightcoral'])
+ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=colors[:len(sentiment_labels)])
 ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 st.pyplot(fig)
