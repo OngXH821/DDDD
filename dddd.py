@@ -15,6 +15,9 @@ nltk.download('stopwords')
 # Load the dataset
 df = pd.read_csv('Dataset-SA.csv')
 
+# Count the number of reviews in the dataset
+total_reviews = len(df)
+
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
 
@@ -48,6 +51,9 @@ accuracy = accuracy_score(y_test, y_pred)
 
 # Streamlit app
 st.title('Sentiment Analysis on Product Reviews')
+
+# Display the total number of reviews
+st.write(f"Total Number of Reviews: {total_reviews}")
 
 st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 st.write("Classification Report:")
