@@ -13,80 +13,72 @@ import seaborn as sns
 # Download stopwords
 nltk.download('stopwords')
 
-# Load the dataset (adjust the path to your dataset)
+# Load the dataset
 df = pd.read_csv('Dataset-SA.csv')
 
-# Preprocessing: Remove stopwords and punctuation from the 'Review' column
+# Preprocessing function
 stop_words = set(stopwords.words('english'))
 
 def preprocess_text(text):
-    # Convert text to lowercase
     text = text.lower()
-    # Remove punctuation
     text = text.translate(str.maketrans('', '', string.punctuation))
-    # Remove stopwords
     words = [word for word in text.split() if word not in stop_words]
     return ' '.join(words)
 
-# Apply the preprocess function to the 'Review' column
+# Apply preprocessing
 df['Review'] = df['Review'].apply(preprocess_text)
 
-# Split data into features (X) and labels (y)
-X = df['Review']  # Using the 'Review' column as the feature
-y = df['Sentiment']  # Using the 'Sentiment' column as the label
+# Split data
+X = df['Review']
+y = df['Sentiment']
 
-# Convert text to TF-IDF features
+# TF-IDF transformation
 tfidf = TfidfVectorizer(max_features=5000)
 X_tfidf = tfidf.fit_transform(X)
 
-# Split into training and testing sets
+# Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X_tfidf, y, test_size=0.3, random_state=42)
 
-# Train a Naive Bayes classifier
+# Train model
 model = MultinomialNB()
 model.fit(X_train, y_train)
 
-# Evaluate the model
+# Evaluate model
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 
-# Streamlit app code
+# Streamlit app
 st.title('Sentiment Analysis on Product Reviews')
 
-# Display model accuracy
 st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
-
-# Display classification report
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
 
-# Function to plot and display confusion matrix
-def plot_confusion_matrix(cm):
+# Determine the unique labels
+unique_labels = sorted(set(y_test) | set(y_pred))
+print("Unique labels:", unique_labels)
+
+# Confusion Matrix
+def plot_confusion_matrix(cm, labels):
     plt.figure(figsize=(10, 7))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
     plt.title('Confusion Matrix')
     st.pyplot()
 
-# Compute and plot confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=['Negative', 'Positive'])
-plot_confusion_matrix(cm)
+cm = confusion_matrix(y_test, y_pred, labels=unique_labels)
+plot_confusion_matrix(cm, unique_labels)
 
-# Function to predict sentiment for new user input
+# Predict sentiment
 def predict_sentiment(user_comment):
-    # Preprocess the user comment
     processed_comment = preprocess_text(user_comment)
-    # Transform it into TF-IDF features
     user_comment_tfidf = tfidf.transform([processed_comment])
-    # Predict sentiment
     prediction = model.predict(user_comment_tfidf)
     return prediction[0]
 
-# Get user input through Streamlit's text input
 user_comment = st.text_input("Enter your product review:")
 
-# Predict sentiment for the input comment when user enters text
 if user_comment:
     sentiment = predict_sentiment(user_comment)
     st.write(f"The sentiment of the comment is: {sentiment}")
