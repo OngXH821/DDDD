@@ -8,6 +8,11 @@ from nltk.corpus import stopwords
 import string
 import streamlit as st
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+
 # Download stopwords
 nltk.download('stopwords')
 
@@ -57,11 +62,6 @@ st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 # Display classification report
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import classification_report
-import pandas as pd
 
 # Assuming you've already generated predictions using your model
 y_pred = model.predict(X_test)
