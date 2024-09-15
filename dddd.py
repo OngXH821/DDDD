@@ -2,13 +2,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report
 import nltk
 from nltk.corpus import stopwords
 import string
 import streamlit as st
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Download stopwords
 nltk.download('stopwords')
@@ -54,13 +53,6 @@ st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
 
-
-
-# Get unique labels
-unique_labels = sorted(set(y_test) | set(y_pred))
-cm = confusion_matrix(y_test, y_pred, labels=unique_labels)
-plot_confusion_matrix(cm, unique_labels)
-
 # Debug: Show sample data for y_test and y_pred
 st.write("Sample y_test values:")
 st.write(y_test.head())
@@ -68,7 +60,6 @@ st.write("Sample y_pred values:")
 st.write(pd.Series(y_pred).head())
 
 # Create DataFrames for actual and predicted sentiment counts
-# Verify creation and renaming of columns
 actual_counts = pd.DataFrame(y_test.value_counts()).reset_index()
 actual_counts.columns = ['Sentiment', 'Count_Actual']
 
