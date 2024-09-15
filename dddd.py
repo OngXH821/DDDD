@@ -54,14 +54,7 @@ st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
 
-# Confusion Matrix
-def plot_confusion_matrix(cm, labels):
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
-    plt.xlabel('Predicted')
-    plt.ylabel('Actual')
-    plt.title('Confusion Matrix')
-    st.pyplot()
+
 
 # Get unique labels
 unique_labels = sorted(set(y_test) | set(y_pred))
