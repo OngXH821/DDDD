@@ -12,7 +12,7 @@ import streamlit as st
 nltk.download('stopwords')
 
 # Load the dataset (adjust the path to your dataset)
-df = pd.read_csv('Dataset-SA.csv')
+df = pd.read_csv('Dataset-SA.csv')  # Ensure the dataset path is correct
 
 # Preprocessing: Remove stopwords and punctuation from the 'Review' column
 stop_words = set(stopwords.words('english'))
