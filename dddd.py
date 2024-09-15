@@ -101,10 +101,6 @@ sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
 
-# Display the count of reviews in a table under the chart
-st.write("### Review Count Table:")
-review_count_table = pd.DataFrame({'Sentiment': sentiment_labels, 'Review Count': sentiment_sizes})
-st.table(review_count_table)
 
 # Define colors for sentiment categories, ensure you have one color per category
 colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']
