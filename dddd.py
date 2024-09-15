@@ -101,6 +101,10 @@ sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
 
+# Display the count of reviews in a table under the chart
+st.write("### Review Count Table:")
+review_count_table = pd.DataFrame({'Sentiment': sentiment_labels, 'Review Count': sentiment_sizes})
+st.table(review_count_table)
 
 # Define colors for sentiment categories, ensure you have one color per category
 colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']
@@ -114,7 +118,3 @@ fig, ax = plt.subplots(figsize=(8, 6))
 ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=colors[:len(sentiment_labels)])
 ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 st.pyplot(fig)
-
-# Display the review count table again under the pie chart
-st.write("### Review Count Table:")
-st.table(review_count_table)
