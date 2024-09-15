@@ -2,11 +2,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import nltk
 from nltk.corpus import stopwords
 import string
 import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Download stopwords
 nltk.download('stopwords')
@@ -57,6 +59,19 @@ st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 # Display classification report
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
+
+# Function to plot and display confusion matrix
+def plot_confusion_matrix(cm):
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    st.pyplot()
+
+# Compute and plot confusion matrix
+cm = confusion_matrix(y_test, y_pred, labels=['Negative', 'Positive'])
+plot_confusion_matrix(cm)
 
 # Function to predict sentiment for new user input
 def predict_sentiment(user_comment):
