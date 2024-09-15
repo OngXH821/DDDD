@@ -33,16 +33,6 @@ def preprocess_text(text):
     words = [word for word in text.split() if word not in stop_words]
     return ' '.join(words)
 
-# Check for missing/empty reviews before preprocessing
-missing_reviews_before = df['Review'].isnull().sum()
-st.write(f"**Number of missing/empty reviews before preprocessing:** {missing_reviews_before}")
-
-# Apply preprocessing
-df['Review'] = df['Review'].apply(preprocess_text)
-
-# Check for missing/empty reviews after preprocessing
-missing_reviews_after = (df['Review'] == '').sum()
-st.write(f"**Number of missing/empty reviews after preprocessing:** {missing_reviews_after}")
 
 # Split data
 X = df['Review']
