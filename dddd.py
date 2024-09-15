@@ -18,8 +18,11 @@ df = pd.read_csv('Dataset-SA.csv')
 # Count the number of reviews in the dataset
 total_reviews = len(df)
 
+# Streamlit app header
+st.title('Sentiment Analysis on Product Reviews')
+
 # Display the total number of reviews before preprocessing
-st.write(f"Total Number of Reviews before Preprocessing: {total_reviews}")
+st.write(f"**Total Number of Reviews before Preprocessing:** {total_reviews}")
 
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
@@ -31,21 +34,25 @@ def preprocess_text(text):
     return ' '.join(words)
 
 # Check for missing/empty reviews before preprocessing
-st.write("Number of missing/empty reviews before preprocessing:", df['Review'].isnull().sum())
+missing_reviews_before = df['Review'].isnull().sum()
+st.write(f"**Number of missing/empty reviews before preprocessing:** {missing_reviews_before}")
 
 # Display sentiment distribution before preprocessing
-st.write("Sentiment distribution before preprocessing:")
-st.write(df['Sentiment'].value_counts())
+st.write("### Sentiment Distribution Before Preprocessing:")
+sentiment_dist_before = df['Sentiment'].value_counts()
+st.bar_chart(sentiment_dist_before)
 
 # Apply preprocessing
 df['Review'] = df['Review'].apply(preprocess_text)
 
 # Check for missing/empty reviews after preprocessing
-st.write("Number of missing/empty reviews after preprocessing:", (df['Review'] == '').sum())
+missing_reviews_after = (df['Review'] == '').sum()
+st.write(f"**Number of missing/empty reviews after preprocessing:** {missing_reviews_after}")
 
 # Display sentiment distribution after preprocessing
-st.write("Sentiment distribution after preprocessing:")
-st.write(df['Sentiment'].value_counts())
+st.write("### Sentiment Distribution After Preprocessing:")
+sentiment_dist_after = df['Sentiment'].value_counts()
+st.bar_chart(sentiment_dist_after)
 
 # Split data
 X = df['Review']
@@ -66,22 +73,12 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 
-# Streamlit app
-st.title('Sentiment Analysis on Product Reviews')
-
-# Display the total number of reviews
-st.write(f"Total Number of Reviews: {total_reviews}")
-
 # Display model accuracy
-st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
-st.write("Classification Report:")
-st.text(classification_report(y_test, y_pred))
+st.write(f"### Model Accuracy: **{accuracy * 100:.2f}%**")
 
-# Debug: Show sample data for y_test and y_pred
-st.write("Sample y_test values:")
-st.write(y_test.head())
-st.write("Sample y_pred values:")
-st.write(pd.Series(y_pred).head())
+# Display classification report
+st.write("### Classification Report:")
+st.text(classification_report(y_test, y_pred))
 
 # Create DataFrames for actual and predicted sentiment counts
 actual_counts = pd.DataFrame(y_test.value_counts()).reset_index()
@@ -90,35 +87,18 @@ actual_counts.columns = ['Sentiment', 'Count_Actual']
 predicted_counts = pd.DataFrame(pd.Series(y_pred).value_counts()).reset_index()
 predicted_counts.columns = ['Sentiment', 'Count_Predicted']
 
-# Display DataFrames for debugging
-st.write("Actual counts DataFrame:")
-st.write(actual_counts)
+# Merge actual and predicted counts
+sentiment_comparison = pd.merge(actual_counts, predicted_counts, on='Sentiment', how='outer').fillna(0)
 
-st.write("Predicted counts DataFrame:")
-st.write(predicted_counts)
-
-# Ensure the Sentiment columns are properly aligned and match
-if 'Sentiment' in actual_counts.columns and 'Sentiment' in predicted_counts.columns:
-    actual_counts['Sentiment'] = actual_counts['Sentiment'].astype(str)
-    predicted_counts['Sentiment'] = predicted_counts['Sentiment'].astype(str)
-
-    # Merge actual and predicted counts
-    sentiment_comparison = pd.merge(actual_counts, predicted_counts, on='Sentiment', how='outer').fillna(0)
-
-    # Plot actual vs predicted sentiment comparison
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sentiment_comparison.plot(kind='bar', x='Sentiment', ax=ax, color=['skyblue', 'orange'])
-    plt.title('Actual vs Predicted Sentiment Counts')
-    plt.xlabel('Sentiment')
-    plt.ylabel('Count')
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-else:
-    st.error("The 'Sentiment' column is missing in one of the DataFrames.")
-    if 'Sentiment' not in actual_counts.columns:
-        st.error("The 'Sentiment' column is missing in actual_counts DataFrame.")
-    if 'Sentiment' not in predicted_counts.columns:
-        st.error("The 'Sentiment' column is missing in predicted_counts DataFrame.")
+# Plot actual vs predicted sentiment comparison
+st.write("### Actual vs Predicted Sentiment Comparison:")
+fig, ax = plt.subplots(figsize=(8, 6))
+sentiment_comparison.plot(kind='bar', x='Sentiment', ax=ax, color=['skyblue', 'orange'])
+plt.title('Actual vs Predicted Sentiment Counts')
+plt.xlabel('Sentiment')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+st.pyplot(fig)
 
 # Predict sentiment
 def predict_sentiment(user_comment):
@@ -128,25 +108,27 @@ def predict_sentiment(user_comment):
     return prediction[0]
 
 # User input for predicting sentiment
+st.write("### Predict Sentiment from Your Review")
 user_comment = st.text_input("Enter your product review:")
 
 if user_comment:
     sentiment = predict_sentiment(user_comment)
-    st.write(f"The sentiment of the comment is: {sentiment}")
+    st.write(f"**The sentiment of the comment is:** {sentiment}")
 
 # Calculate sentiment distribution
-st.write("Sentiment Distribution:")
+st.write("### Sentiment Distribution (Post-Processing):")
 sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
 
 # Define colors for sentiment categories, ensure you have one color per category
-colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']  # Adjust this list as needed
+colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']
 
 # Calculate percentages
 sentiment_percentages = sentiment_sizes / sentiment_sizes.sum() * 100
 
 # Plot pie chart
+st.write("### Sentiment Distribution Pie Chart:")
 fig, ax = plt.subplots(figsize=(8, 6))
 ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=colors[:len(sentiment_labels)])
 ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
