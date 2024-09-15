@@ -55,6 +55,7 @@ st.title('Sentiment Analysis on Product Reviews')
 # Display the total number of reviews
 st.write(f"Total Number of Reviews: {total_reviews}")
 
+# Display model accuracy
 st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
@@ -115,3 +116,18 @@ user_comment = st.text_input("Enter your product review:")
 if user_comment:
     sentiment = predict_sentiment(user_comment)
     st.write(f"The sentiment of the comment is: {sentiment}")
+
+# Calculate sentiment distribution
+st.write("Sentiment Distribution:")
+sentiment_distribution = df['Sentiment'].value_counts()
+sentiment_labels = sentiment_distribution.index
+sentiment_sizes = sentiment_distribution.values
+
+# Calculate percentages
+sentiment_percentages = sentiment_sizes / sentiment_sizes.sum() * 100
+
+# Plot pie chart
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=['lightblue', 'lightcoral'])
+ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+st.pyplot(fig)
