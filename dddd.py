@@ -21,9 +21,6 @@ total_reviews = len(df)
 # Streamlit app header
 st.title('Sentiment Analysis on Product Reviews')
 
-# Display the total number of reviews before preprocessing
-st.write(f"**Total Number of Reviews before Preprocessing:** {total_reviews}")
-
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
 
@@ -100,6 +97,9 @@ st.write("### Sentiment Distribution (Post-Processing):")
 sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
+
+# Display the total number of reviews before preprocessing
+st.write(f"**Total Number of Reviews before Preprocessing:** {total_reviews}")
 
 # Display the count of reviews in a table under the chart
 st.write("### Review Count Table:")
