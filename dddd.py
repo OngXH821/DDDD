@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
 import nltk
 from nltk.corpus import stopwords
 import string
@@ -21,6 +21,9 @@ total_reviews = len(df)
 # Streamlit app header
 st.title('Sentiment Analysis on Product Reviews')
 
+# Display the total number of reviews before preprocessing
+st.write(f"**Total Number of Reviews before Preprocessing:** {total_reviews}")
+
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
 
@@ -30,6 +33,16 @@ def preprocess_text(text):
     words = [word for word in text.split() if word not in stop_words]
     return ' '.join(words)
 
+# Check for missing/empty reviews before preprocessing
+missing_reviews_before = df['Review'].isnull().sum()
+st.write(f"**Number of missing/empty reviews before preprocessing:** {missing_reviews_before}")
+
+# Apply preprocessing
+df['Review'] = df['Review'].apply(preprocess_text)
+
+# Check for missing/empty reviews after preprocessing
+missing_reviews_after = (df['Review'] == '').sum()
+st.write(f"**Number of missing/empty reviews after preprocessing:** {missing_reviews_after}")
 
 # Split data
 X = df['Review']
@@ -53,10 +66,6 @@ accuracy = accuracy_score(y_test, y_pred)
 # Display model accuracy
 st.write(f"### Model Accuracy: **{accuracy * 100:.2f}%**")
 
-# Display classification report
-st.write("### Classification Report:")
-st.text(classification_report(y_test, y_pred))
-
 # Create DataFrames for actual and predicted sentiment counts
 actual_counts = pd.DataFrame(y_test.value_counts()).reset_index()
 actual_counts.columns = ['Sentiment', 'Count_Actual']
@@ -76,6 +85,10 @@ plt.xlabel('Sentiment')
 plt.ylabel('Count')
 plt.xticks(rotation=45)
 st.pyplot(fig)
+
+# Display the count of actual and predicted reviews in a table under the bar chart
+st.write("### Actual and Predicted Review Counts Table:")
+st.table(sentiment_comparison)
 
 # Predict sentiment
 def predict_sentiment(user_comment):
@@ -98,13 +111,8 @@ sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
 
-# Display the total number of reviews before preprocessing
-st.write(f"**Total Number of Reviews before Preprocessing:** {total_reviews}")
-
 # Display the count of reviews in a table under the chart
-st.write("### Review Count Table:")
 review_count_table = pd.DataFrame({'Sentiment': sentiment_labels, 'Review Count': sentiment_sizes})
-st.table(review_count_table)
 
 # Define colors for sentiment categories, ensure you have one color per category
 colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']
@@ -118,3 +126,7 @@ fig, ax = plt.subplots(figsize=(8, 6))
 ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=colors[:len(sentiment_labels)])
 ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 st.pyplot(fig)
+
+# Display the review count table again under the pie chart
+st.write("### Review Count Table:")
+st.table(review_count_table)
