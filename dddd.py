@@ -96,6 +96,7 @@ if user_comment:
     st.write(f"**The sentiment of the comment is:** {sentiment}")
 
 # Calculate sentiment distribution
+st.write("### Sentiment Distribution (Post-Processing):")
 sentiment_distribution = df['Sentiment'].value_counts()
 sentiment_labels = sentiment_distribution.index
 sentiment_sizes = sentiment_distribution.values
