@@ -8,11 +8,6 @@ from nltk.corpus import stopwords
 import string
 import streamlit as st
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-
 # Download stopwords
 nltk.download('stopwords')
 
@@ -62,34 +57,6 @@ st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
 # Display classification report
 st.write("Classification Report:")
 st.text(classification_report(y_test, y_pred))
-
-# Assuming you've already generated predictions using your model
-y_pred = model.predict(X_test)
-
-# Get classification report as a dictionary
-report = classification_report(y_test, y_pred, output_dict=True)
-
-# Convert the classification report to a DataFrame
-df_report = pd.DataFrame(report).transpose()
-
-# Filter out support and accuracy rows
-df_report = df_report.drop(['accuracy', 'macro avg', 'weighted avg'], axis=0)
-
-# Plot a bar chart for precision, recall, and f1-score
-plt.figure(figsize=(10, 6))
-sns.barplot(x=df_report.index, y=df_report['precision'], color='b', label='Precision')
-sns.barplot(x=df_report.index, y=df_report['recall'], color='r', label='Recall', alpha=0.5)
-sns.barplot(x=df_report.index, y=df_report['f1-score'], color='g', label='F1-Score', alpha=0.3)
-
-# Add labels and title
-plt.title('Classification Report Metrics')
-plt.ylabel('Score')
-plt.xlabel('Classes')
-plt.legend()
-
-# Show the plot
-plt.show()
-
 
 # Function to predict sentiment for new user input
 def predict_sentiment(user_comment):
