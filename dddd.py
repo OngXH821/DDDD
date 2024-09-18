@@ -10,7 +10,6 @@ import string
 import joblib  # Import joblib for saving/loading models
 import streamlit as st
 import matplotlib.pyplot as plt
-from io import StringIO
 
 # Download stopwords
 nltk.download('stopwords')
@@ -67,12 +66,24 @@ st.write(f"*Total Number of Reviews before Preprocessing:* {len(df)}")
 # File uploader
 uploaded_file = st.file_uploader("Upload a CSV file containing reviews")
 
-# Predict sentiment with the selected model (Naive Bayes as default)
-def predict_sentiment(user_comment, model):
+# Predict sentiment with all models
+def predict_sentiment_with_all_models(user_comment):
     processed_comment = preprocess_text(user_comment)
     user_comment_tfidf = tfidf.transform([processed_comment])
-    prediction = model.predict(user_comment_tfidf)
-    return prediction[0]
+
+    # Load models
+    naive_bayes_model = joblib.load('naive_bayes_model.joblib')
+    svm_model = joblib.load('support_vector_machine_model.joblib')
+    logistic_regression_model = joblib.load('logistic_regression_model.joblib')
+
+    # Predict with each model
+    predictions = {
+        'Naive Bayes': naive_bayes_model.predict(user_comment_tfidf)[0],
+        'SVM': svm_model.predict(user_comment_tfidf)[0],
+        'Logistic Regression': logistic_regression_model.predict(user_comment_tfidf)[0]
+    }
+    
+    return predictions
 
 # Handle file upload
 if uploaded_file is not None:
@@ -87,46 +98,30 @@ if uploaded_file is not None:
         X_uploaded = uploaded_df['Review']
         X_uploaded_tfidf = tfidf.transform(X_uploaded)
         
-        # Load the Naive Bayes model by default
-        model = joblib.load('naive_bayes_model.joblib')
-        y_pred_uploaded = model.predict(X_uploaded_tfidf)
-        uploaded_df['Sentiment'] = y_pred_uploaded
+        # Load models
+        naive_bayes_model = joblib.load('naive_bayes_model.joblib')
+        svm_model = joblib.load('support_vector_machine_model.joblib')
+        logistic_regression_model = joblib.load('logistic_regression_model.joblib')
+
+        # Predict using all models
+        uploaded_df['Sentiment_Naive_Bayes'] = naive_bayes_model.predict(X_uploaded_tfidf)
+        uploaded_df['Sentiment_SVM'] = svm_model.predict(X_uploaded_tfidf)
+        uploaded_df['Sentiment_Logistic_Regression'] = logistic_regression_model.predict(X_uploaded_tfidf)
         
-        # Calculate sentiment distribution
-        sentiment_distribution = uploaded_df['Sentiment'].value_counts()
-        sentiment_labels = sentiment_distribution.index
-        sentiment_sizes = sentiment_distribution.values
-
-        # Define colors for sentiment categories
-        colors = ['lightblue', 'lightcoral', 'lightgreen', 'lightskyblue']
-
-        # Calculate percentages
-        sentiment_percentages = sentiment_sizes / sentiment_sizes.sum() * 100
-
-        # Plot pie chart
-        st.write("### Sentiment Distribution Pie Chart (Uploaded File):")
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.pie(sentiment_percentages, labels=sentiment_labels, autopct='%1.1f%%', startangle=140, colors=colors[:len(sentiment_labels)])
-        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        st.pyplot(fig)
-
-        # Display the review count table
-        review_count_table = pd.DataFrame({'Sentiment': sentiment_labels, 'Review Count': sentiment_sizes})
-        st.write("### Review Count Table (Uploaded File):")
-        st.table(review_count_table)
+        # Show predictions from all models
+        st.write("### Sentiment Predictions from All Models:")
+        st.dataframe(uploaded_df[['Review', 'Sentiment_Naive_Bayes', 'Sentiment_SVM', 'Sentiment_Logistic_Regression']])
 
 # User input for predicting sentiment
 user_comment = st.text_input("Enter your product review:")
 
 if user_comment:
-    # Load the Naive Bayes model
-    model = joblib.load('naive_bayes_model.joblib')
-    sentiment = predict_sentiment(user_comment, model)
+    # Get predictions from all models
+    sentiments = predict_sentiment_with_all_models(user_comment)
     
-    # Define color based on sentiment
-    color = 'green' if sentiment == 'positive' else 'red'
-    
-    # Display sentiment with color
-    st.markdown(f"<p style='color:{color}; font-size:20px;'>*The sentiment of the comment is:* {sentiment}</p>", unsafe_allow_html=True)
+    # Display sentiments from all models
+    st.write(f"### Sentiment Predictions for Your Review:")
+    for model_name, sentiment in sentiments.items():
+        color = 'green' if sentiment == 'positive' else 'red'
+        st.markdown(f"<p style='color:{color}; font-size:20px;'>*{model_name}:* {sentiment}</p>", unsafe_allow_html=True)
 
-# The pie chart is displayed only if a file is uploaded
