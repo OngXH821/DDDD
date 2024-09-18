@@ -1,3 +1,4 @@
+# Import necessary libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -10,7 +11,6 @@ import string
 import joblib  # Import joblib for saving/loading models
 import streamlit as st
 import matplotlib.pyplot as plt
-from io import StringIO
 
 # Download stopwords
 nltk.download('stopwords')
@@ -129,4 +129,4 @@ if user_comment:
     # Display sentiment with color
     st.markdown(f"<p style='color:{color}; font-size:20px;'>*The sentiment of the comment is:* {sentiment}</p>", unsafe_allow_html=True)
 
-# The pie chart is displayed only if a file is uploaded
+# The pie chart and review count table are displayed only if a file is uploaded.
