@@ -1,4 +1,3 @@
-# Import necessary libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -15,9 +14,6 @@ import matplotlib.pyplot as plt
 # Download stopwords
 nltk.download('stopwords')
 
-# Load the dataset
-df = pd.read_csv('Dataset-SA.csv')
-
 # Preprocessing function
 stop_words = set(stopwords.words('english'))
 
@@ -29,66 +25,69 @@ def preprocess_text(text):
     words = [word for word in text.split() if word not in stop_words]
     return ' '.join(words)
 
-# Apply preprocessing
-df['Review'] = df['Review'].apply(preprocess_text)
-
-# Prepare data for modeling
-X = df['Review']
-y = df['Sentiment']
-
-# TF-IDF transformation
-tfidf = TfidfVectorizer(max_features=5000)
-X_tfidf = tfidf.fit_transform(X)
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X_tfidf, y, test_size=0.3, random_state=42)
-
-# Create models: Naive Bayes, SVM, and Logistic Regression
-models = {
-    'Naive Bayes': MultinomialNB(),
-    'Support Vector Machine': SVC(kernel='linear', random_state=42),
-    'Logistic Regression': LogisticRegression(random_state=42, max_iter=500)
-}
-
-# Train each model and save them
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    joblib.dump(model, f'{name.replace(" ", "_").lower()}_model.joblib')
-
-# Save the TF-IDF vectorizer
-joblib.dump(tfidf, 'tfidf_vectorizer.joblib')
-
 # Streamlit app header
 st.title('Sentiment Analysis on Product Reviews')
-
-# Display the total number of reviews before preprocessing
-st.write(f"*Total Number of Reviews before Preprocessing:* {len(df)}")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload a CSV file containing reviews")
 
 # Predict sentiment with the selected model (Naive Bayes as default)
-def predict_sentiment(user_comment, model):
+def predict_sentiment(user_comment, model, tfidf):
     processed_comment = preprocess_text(user_comment)
     user_comment_tfidf = tfidf.transform([processed_comment])
     prediction = model.predict(user_comment_tfidf)
     return prediction[0]
 
-# Handle file upload
-if uploaded_file is not None:
-    # Read and preprocess the uploaded file
+# If no file is uploaded, train models using a default dataset
+if uploaded_file is None:
+    # Load default dataset
+    df = pd.read_csv('Dataset-SA.csv')
+    
+    # Apply preprocessing
+    df['Review'] = df['Review'].apply(preprocess_text)
+
+    # Prepare data for modeling
+    X = df['Review']
+    y = df['Sentiment']
+
+    # TF-IDF transformation
+    tfidf = TfidfVectorizer(max_features=5000)
+    X_tfidf = tfidf.fit_transform(X)
+
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X_tfidf, y, test_size=0.3, random_state=42)
+
+    # Create models: Naive Bayes, SVM, and Logistic Regression
+    models = {
+        'Naive Bayes': MultinomialNB(),
+        'Support Vector Machine': SVC(kernel='linear', random_state=42),
+        'Logistic Regression': LogisticRegression(random_state=42, max_iter=500)
+    }
+
+    # Train each model and save them
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        joblib.dump(model, f'{name.replace(" ", "_").lower()}_model.joblib')
+
+    # Save the TF-IDF vectorizer
+    joblib.dump(tfidf, 'tfidf_vectorizer.joblib')
+
+    st.write(f"*Total Number of Reviews before Preprocessing:* {len(df)}")
+
+else:
+    # Handle file upload
     uploaded_df = pd.read_csv(uploaded_file)
     if 'Review' not in uploaded_df.columns:
         st.error("The uploaded file must contain a 'Review' column.")
     else:
-        # Ensure 'Review' column is a string
+        # Load the Naive Bayes model and TF-IDF vectorizer
+        model = joblib.load('naive_bayes_model.joblib')
+        tfidf = joblib.load('tfidf_vectorizer.joblib')
+        
+        # Preprocess and predict sentiment for uploaded reviews
         uploaded_df['Review'] = uploaded_df['Review'].astype(str)
         uploaded_df['Review'] = uploaded_df['Review'].apply(preprocess_text)
-        X_uploaded = uploaded_df['Review']
-        X_uploaded_tfidf = tfidf.transform(X_uploaded)
-        
-        # Load the Naive Bayes model by default
-        model = joblib.load('naive_bayes_model.joblib')
+        X_uploaded_tfidf = tfidf.transform(uploaded_df['Review'])
         y_pred_uploaded = model.predict(X_uploaded_tfidf)
         uploaded_df['Sentiment'] = y_pred_uploaded
         
@@ -119,14 +118,14 @@ if uploaded_file is not None:
 user_comment = st.text_input("Enter your product review:")
 
 if user_comment:
-    # Load the Naive Bayes model
+    # Load the Naive Bayes model and TF-IDF vectorizer
     model = joblib.load('naive_bayes_model.joblib')
-    sentiment = predict_sentiment(user_comment, model)
+    tfidf = joblib.load('tfidf_vectorizer.joblib')
+    
+    sentiment = predict_sentiment(user_comment, model, tfidf)
     
     # Define color based on sentiment
     color = 'green' if sentiment == 'positive' else 'red'
     
     # Display sentiment with color
     st.markdown(f"<p style='color:{color}; font-size:20px;'>*The sentiment of the comment is:* {sentiment}</p>", unsafe_allow_html=True)
-
-# The pie chart and review count table are displayed only if a file is uploaded.
