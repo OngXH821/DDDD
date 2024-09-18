@@ -60,9 +60,6 @@ joblib.dump(tfidf, 'tfidf_vectorizer.joblib')
 # Streamlit app header
 st.title('Sentiment Analysis on Product Reviews')
 
-# Display the total number of reviews before preprocessing
-st.write(f"*Total Number of Reviews before Preprocessing:* {len(df)}")
-
 # File uploader
 uploaded_file = st.file_uploader("Upload a CSV file containing reviews")
 
@@ -124,4 +121,3 @@ if user_comment:
     for model_name, sentiment in sentiments.items():
         color = 'green' if sentiment == 'positive' else 'red'
         st.markdown(f"<p style='color:{color}; font-size:20px;'>*{model_name}:* {sentiment}</p>", unsafe_allow_html=True)
-
