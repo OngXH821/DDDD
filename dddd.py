@@ -115,6 +115,22 @@ if uploaded_file is not None:
         st.write("### Review Count Table (Uploaded File):")
         st.table(review_count_table)
 
+# User input for predicting sentiment
+user_comment = st.text_input("Enter your product review:")
+
+if user_comment:
+    # Load the Naive Bayes model
+    model = joblib.load('naive_bayes_model.joblib')
+    sentiment = predict_sentiment(user_comment, model)
+    
+    # Define color based on sentiment
+    color = 'green' if sentiment == 'positive' else 'red'
+    
+    # Display sentiment with color
+    st.markdown(f"<p style='color:{color}; font-size:20px;'>*The sentiment of the comment is:* {sentiment}</p>", unsafe_allow_html=True)
+
+# The pie chart is displayed only if a file is uploaded
+
 from sklearn.metrics import classification_report
 
 # Function to evaluate and display model metrics
@@ -144,20 +160,3 @@ log_reg_model = joblib.load('logistic_regression_model.joblib')
 display_metrics('Naive Bayes', naive_bayes_model, X_test, y_test)
 display_metrics('Support Vector Machine', svm_model, X_test, y_test)
 display_metrics('Logistic Regression', log_reg_model, X_test, y_test)
-
-
-# User input for predicting sentiment
-user_comment = st.text_input("Enter your product review:")
-
-if user_comment:
-    # Load the Naive Bayes model
-    model = joblib.load('naive_bayes_model.joblib')
-    sentiment = predict_sentiment(user_comment, model)
-    
-    # Define color based on sentiment
-    color = 'green' if sentiment == 'positive' else 'red'
-    
-    # Display sentiment with color
-    st.markdown(f"<p style='color:{color}; font-size:20px;'>*The sentiment of the comment is:* {sentiment}</p>", unsafe_allow_html=True)
-
-# The pie chart is displayed only if a file is uploaded
